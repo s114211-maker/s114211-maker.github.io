@@ -3,171 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第一視角：睡前任務互動報告</title>
+    <title>期末報告：第一視角房間任務</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: "Microsoft JhengHei", sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
 
-        /* 遊戲場景 */
-        #game-world {
+        /* 遊戲主場景 */
+        #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* 使用剛才選定的 2D 房間圖 */
-            background-image: url('https://i.imgur.com/vHq0F2r.png'); 
+            /* 使用穩定的 2D 房間插畫網址 */
+            background-image: url('https://images.unsplash.com/photo-1513512147376-c09152109aa5?auto=format&fit=crop&q=80&w=2000'); 
             background-size: cover;
             background-position: center;
             transition: filter 1.5s ease;
         }
 
-        /* 任務計數器 */
+        /* 介面 UI */
         #hud {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             color: white;
-            padding: 10px 25px;
-            border-radius: 50px;
+            padding: 15px 25px;
+            border-radius: 30px;
             font-size: 24px;
             z-index: 100;
+            border: 2px solid white;
         }
 
-        /* 驚嘆號定位與樣式 */
+        /* 驚嘆號動畫 */
         .exclamation {
             position: absolute;
             cursor: pointer;
-            font-size: 45px;
-            color: #FFD700;
-            text-shadow: 0 0 10px #000;
+            font-size: 50px;
+            color: #ff3e3e;
+            text-shadow: 2px 2px 10px #fff;
             animation: bounce 0.6s infinite alternate;
-            display: none; /* 預設隱藏，由 JS 隨機開啟 */
+            display: none;
+            z-index: 50;
             text-align: center;
         }
-        .exclamation small { display: block; font-size: 14px; color: white; background: rgba(0,0,0,0.5); border-radius: 5px; }
+        .exclamation small {
+            display: block;
+            font-size: 16px;
+            background: #fff;
+            color: #000;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
 
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-20px); } }
 
-        /* 各物件坐標 (根據 2D 圖片調整) */
-        #task-desk     { top: 52%; left: 48%; }
-        #task-bath     { top: 45%; left: 18%; }
-        #task-toy      { top: 72%; left: 35%; }
-        #task-trash    { top: 70%; left: 55%; }
-        #task-window   { top: 25%; left: 45%; }
-        #task-switch   { top: 48%; left: 30%; } /* 電燈開關 */
-        #task-bed      { top: 80%; left: 75%; } /* 床 */
+        /* 物件座標調整區 (你可以修改這裡的 % 來對準圖片中的物品) */
+        #task-desk   { top: 55%; left: 30%; }
+        #task-bath   { top: 40%; left: 10%; } /* 假設門在左邊 */
+        #task-toy    { top: 75%; left: 45%; }
+        #task-trash  { top: 80%; left: 20%; }
+        #task-window { top: 30%; left: 50%; }
+        #task-switch { top: 45%; left: 20%; }
+        #task-bed    { top: 70%; left: 75%; }
 
         /* 彈出視窗 */
-        #modal-overlay {
+        #modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-        }
-        #modal-content {
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
             padding: 40px;
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
-            max-width: 300px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            z-index: 1000;
         }
-        button { padding: 10px 20px; font-size: 18px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 5px; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 30px; font-size: 20px; border-radius: 10px; cursor: pointer; }
 
-        /* 狀態效果 */
-        .night-filter { filter: brightness(0.3) contrast(1.2); }
-        .sleep-filter { filter: brightness(0); }
+        /* 特效區 */
+        .night { filter: brightness(0.3) sepia(0.5); }
+        .sleep { filter: brightness(0) !important; }
     </style>
 </head>
 <body>
 
-<div id="hud">任務進度: <span id="progress">0</span>/3</div>
+<div id="hud">任務進度: <span id="count">0</span>/3</div>
 
-<div id="game-world">
+<div id="game-container">
     <div id="task-desk" class="exclamation" onclick="openTask('書桌')">❗<small>整理書桌</small></div>
-    <div id="task-bath" class="exclamation" onclick="openTask('浴室')">❗<small>刷牙洗臉</small></div>
+    <div id="task-bath" class="exclamation" onclick="openTask('浴室')">❗<small>浴室洗臉</small></div>
     <div id="task-toy" class="exclamation" onclick="openTask('玩具')">❗<small>收好玩具</small></div>
     <div id="task-trash" class="exclamation" onclick="openTask('垃圾桶')">❗<small>倒垃圾</small></div>
-    <div id="task-window" class="exclamation" onclick="openTask('窗戶')">❗<small>關窗戶</small></div>
+    <div id="task-window" class="exclamation" onclick="openTask('窗戶')">❗<small>關上窗戶</small></div>
     
-    <div id="task-switch" class="exclamation" onclick="toggleLight()">❗<small>關燈</small></div>
-    <div id="task-bed" class="exclamation" onclick="sleepNow()">❗<small>睡覺</small></div>
+    <div id="task-switch" class="exclamation" onclick="goDark()">❗<small>關燈</small></div>
+    <div id="task-bed" class="exclamation" onclick="goSleep()">❗<small>睡覺</small></div>
 </div>
 
-<div id="modal-overlay">
-    <div id="modal-content">
-        <h2 id="task-title">任務</h2>
-        <p>確認完成這個項目嗎？</p>
-        <button onclick="closeTask()">完成！</button>
-    </div>
+<div id="modal">
+    <h2 id="m-title">任務</h2>
+    <p>點擊按鈕完成任務</p>
+    <button onclick="finishTask()">確認完成</button>
 </div>
 
-<audio id="rooster" src="https://assets.mixkit.co/sfx/preview/mixkit-rooster-crowing-in-the-morning-2435.mp3"></audio>
+<audio id="crow" src="https://assets.mixkit.co/sfx/preview/mixkit-rooster-crowing-in-the-morning-2435.mp3"></audio>
 
 <script>
-    let score = 0;
-    let currentTask = "";
+    let done = 0;
+    let currentId = "";
 
-    // 1. 初始化：隨機挑選 3 個任務
-    const allTasks = ['task-desk', 'task-bath', 'task-toy', 'task-trash', 'task-window'];
-    const selected = allTasks.sort(() => 0.5 - Math.random()).slice(0, 3);
-    
-    selected.forEach(id => {
-        document.getElementById(id).style.display = 'block';
-    });
+    // 隨機選3種
+    const tasks = ['task-desk', 'task-bath', 'task-toy', 'task-trash', 'task-window'];
+    const selected = tasks.sort(() => 0.5 - Math.random()).slice(0, 3);
+    selected.forEach(id => document.getElementById(id).style.display = 'block');
 
-    // 2. 任務視窗邏輯
     function openTask(name) {
-        currentTask = name;
-        document.getElementById('task-title').innerText = name;
-        document.getElementById('modal-overlay').style.display = 'flex';
+        currentId = name;
+        document.getElementById('m-title').innerText = "正在" + name + "...";
+        document.getElementById('modal').style.display = 'block';
     }
 
-    function closeTask() {
-        document.getElementById('modal-overlay').style.display = 'none';
-        // 隱藏剛完成的任務
-        const taskElements = document.getElementsByClassName('exclamation');
-        for(let el of taskElements) {
-            if(el.innerText.includes(currentTask)) {
+    function finishTask() {
+        document.getElementById('modal').style.display = 'none';
+        // 隱藏對應的驚嘆號
+        const items = document.querySelectorAll('.exclamation');
+        items.forEach(el => {
+            if(el.innerText.includes(currentId)) {
                 el.style.display = 'none';
-                score++;
-                break;
+                done++;
             }
-        }
-        document.getElementById('progress').innerText = score;
+        });
+        document.getElementById('count').innerText = done;
 
-        // 3. 判斷是否完成所有 3 個任務
-        if(score === 3) {
-            setTimeout(() => {
-                alert("任務全部完成！該去關燈睡覺了。");
-                document.getElementById('task-switch').style.display = 'block';
-            }, 500);
+        if(done === 3) {
+            alert("睡前準備好了！去關燈吧。");
+            document.getElementById('task-switch').style.display = 'block';
         }
     }
 
-    // 4. 關燈邏輯
-    function toggleLight() {
-        document.getElementById('game-world').classList.add('night-filter');
+    function goDark() {
+        document.getElementById('game-container').classList.add('night');
         document.getElementById('task-switch').style.display = 'none';
         document.getElementById('task-bed').style.display = 'block';
     }
 
-    // 5. 睡覺邏輯
-    function sleepNow() {
-        document.getElementById('game-world').classList.add('sleep-filter');
+    function goSleep() {
+        document.getElementById('game-container').classList.add('sleep');
         document.getElementById('task-bed').style.display = 'none';
         
         setTimeout(() => {
-            document.getElementById('rooster').play();
-            document.getElementById('game-world').classList.remove('sleep-filter', 'night-filter');
+            document.getElementById('crow').play();
+            document.getElementById('game-container').classList.remove('sleep', 'night');
             setTimeout(() => {
                 alert("恭喜你！一夜好眠！");
-                location.reload(); // 重新開始
-            }, 500);
+                location.reload();
+            }, 1000);
         }, 3000);
     }
 </script>
-
 </body>
 </html>
