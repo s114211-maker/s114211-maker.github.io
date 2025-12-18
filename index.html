@@ -3,18 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第一視角：睡前任務</title>
+    <title>第一視角：睡前任務報告</title>
     <style>
-        :root { --bg-color: #f0f0f0; }
-        body { margin: 0; font-family: sans-serif; overflow: hidden; }
-        
-        /* 房間場景容器 */
-        #room-scene {
-            position: relative;
-            width: 100vw;
+        /* 全域樣式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            background: #87CEEB; /* 這裡之後可以換成房間的底圖 */
-            transition: background 1s, filter 1s;
+            background-color: #333;
+        }
+
+        /* 遊戲視窗容器 */
+        #game-container {
+            position: relative;
+            width: 1200px; /* 根據你的背景圖尺寸調整 */
+            height: 750px; /* 根據你的背景圖尺寸調整 */
+            border: 5px solid #555;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            overflow: hidden; /* 確保內容不溢出 */
+        }
+
+        /* 房間場景 */
+        #room-scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.imgur.com/your-day-room-image.jpg'); /* << 請替換為你的白天房間圖片URL */
+            background-size: cover;
+            background-position: center;
+            transition: filter 2s ease-in-out, background-image 2s ease-in-out;
+            filter: brightness(1); /* 預設亮度 */
         }
 
         /* 任務計數器 */
@@ -22,136 +44,261 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
             padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 20px;
+            border-radius: 25px;
+            font-size: 24px;
             font-weight: bold;
             z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         /* 驚嘆號樣式 */
         .exclamation {
             position: absolute;
             cursor: pointer;
-            font-size: 40px;
-            color: #ff3e3e;
+            font-size: 50px;
+            color: #FFD700; /* 金色驚嘆號 */
             font-weight: bold;
-            animation: bounce 0.5s infinite alternate;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            animation: bounce 0.8s infinite alternate;
             display: none; /* 預設隱藏 */
+            z-index: 50;
         }
 
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        /* 驚嘆號內的小字 */
+        .exclamation small {
+            font-size: 16px;
+            color: white;
+            display: block;
+            text-align: center;
+            margin-top: -5px;
+            text-shadow: 0 0 5px black;
+        }
 
-        /* 彈出任務視窗 */
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+
+        /* 任務彈出視窗 */
         #task-modal {
             display: none;
-            position: fixed;
-            top: 50%; left: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             z-index: 200;
             text-align: center;
+            width: 400px;
+            max-width: 80%;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-out;
+        }
+        #task-modal h3 { color: #333; font-size: 28px; margin-bottom: 20px; }
+        #task-modal p { color: #666; font-size: 18px; line-height: 1.6; }
+        #task-modal button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 20px;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #task-modal button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+        /* 遊戲通知 */
+        #game-notification {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 20px;
+            font-size: 32px;
+            text-align: center;
+            z-index: 300;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            animation: fadeIn 0.5s ease-out;
         }
 
-        /* 昏暗效果 */
-        .dark { background: #000033 !important; filter: brightness(0.4); }
-        .sleep-mode { background: #000 !important; filter: brightness(0); }
+        /* 夜晚效果 */
+        .night-mode {
+            filter: brightness(0.2) grayscale(0.3); /* 降低亮度，略微去色 */
+            background-image: url('https://i.imgur.com/your-night-room-image.jpg') !important; /* << 請替換為你的夜晚房間圖片URL (如果有的話) */
+        }
+        /* 睡覺模式 */
+        .sleep-mode {
+            filter: brightness(0) !important; /* 完全變黑 */
+        }
     </style>
 </head>
 <body>
 
-<div id="task-counter">任務進度: <span id="count">0</span>/3</div>
+<div id="game-container">
+    <div id="room-scene">
+        <div id="task-counter">任務進度: <span id="count">0</span>/3</div>
 
-<div id="room-scene">
-    <div id="desk" class="exclamation" style="top: 50%; left: 20%;">❗<br><small style="font-size:12px">書桌</small></div>
-    <div id="bed" class="exclamation" style="top: 60%; left: 70%;">❗<br><small style="font-size:12px">床</small></div>
-    <div id="bath" class="exclamation" style="top: 40%; left: 80%;">❗<br><small style="font-size:12px">浴室</small></div>
-    <div id="light-switch" class="exclamation" style="top: 30%; left: 10%;">❗<br><small style="font-size:12px">電燈</small></div>
+        <div id="desk" class="exclamation" style="top: 55%; left: 20%;">❗<small>書桌</small></div>
+        <div id="bed" class="exclamation" style="top: 65%; left: 75%;">❗<small>床</small></div>
+        <div id="bathroom-door" class="exclamation" style="top: 45%; left: 85%;">❗<small>浴室</small></div>
+        <div id="window" class="exclamation" style="top: 30%; left: 50%;">❗<small>窗戶</small></div>
+        <div id="toy-box" class="exclamation" style="top: 75%; left: 35%;">❗<small>玩具箱</small></div>
+        <div id="bookshelf" class="exclamation" style="top: 40%; left: 10%;">❗<small>書架</small></div>
+        <div id="clothes-hanger" class="exclamation" style="top: 50%; left: 90%;">❗<small>衣帽架</small></div>
+        <div id="lamp" class="exclamation" style="top: 25%; left: 60%;">❗<small>檯燈</small></div>
+        <div id="computer" class="exclamation" style="top: 48%; left: 25%;">❗<small>電腦</small></div>
+        <div id="trash-can" class="exclamation" style="top: 80%; left: 15%;">❗<small>垃圾桶</small></div>
+
+        <div id="light-switch" class="exclamation" style="top: 40%; left: 5%;">❗<small>電燈開關</small></div>
+    </div>
 </div>
 
 <div id="task-modal">
-    <h3 id="modal-title">任務內容</h3>
-    <p>請點擊完成任務！</p>
-    <button onclick="completeTask()">完成</button>
+    <h3 id="modal-title"></h3>
+    <p>請完成這個小任務！</p>
+    <button onclick="completeTask()">確認完成</button>
 </div>
 
-<audio id="rooster-sound" src="https://www.soundjay.com/nature/sounds/rooster-crowing-01.mp3"></audio>
+<div id="game-notification">
+    <p id="notification-message"></p>
+</div>
+
+<audio id="rooster-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-rooster-crowing-in-the-morning-2435.mp3" preload="auto"></audio>
 
 <script>
     let finishedTasks = 0;
-    let targetTasks = 3;
-    let currentTaskItem = null;
+    const targetTasks = 3; // 目標任務數
 
-    // 10 種可能的任務地點 (ID)
-    const allTaskIds = ['desk', 'bath', 'window', 'toy', 'shelf', 'plant', 'closet', 'chair', 'carpet', 'mirror']; 
-    // 注意：上面的 ID 必須在 HTML 中有對應的 div
-    
-    // 初始化遊戲：隨機挑選 3 個
+    let currentTaskItem = null; // 當前被點擊的任務景物
+    let isNight = false; // 是否進入夜晚
+
+    // 所有的任務景物 ID 和其對應的顯示名稱
+    const allTaskLocations = {
+        'desk': '整理書桌',
+        'bathroom-door': '去浴室洗漱',
+        'window': '關上窗戶',
+        'toy-box': '收拾玩具',
+        'bookshelf': '整理書架',
+        'clothes-hanger': '掛好衣服',
+        'lamp': '關閉檯燈',
+        'computer': '關閉電腦',
+        'trash-can': '倒垃圾',
+        // 'bed' 和 'light-switch' 是特殊景物，不列入隨機任務
+    };
+    const allTaskIds = Object.keys(allTaskLocations);
+
+    // 遊戲初始化
     function initGame() {
+        // 隨機選取 targetTasks 個任務
         const shuffled = allTaskIds.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 3);
+        const selectedTaskIds = shuffled.slice(0, targetTasks);
         
-        selected.forEach(id => {
+        // 顯示被選中的任務驚嘆號
+        selectedTaskIds.forEach(id => {
             const el = document.getElementById(id);
-            if(el) el.style.display = 'block';
+            if(el) {
+                el.style.display = 'block';
+                el.onclick = () => showTaskModal(id); // 為每個任務綁定點擊事件
+            }
         });
 
-        // 監聽點擊
-        document.querySelectorAll('.exclamation').forEach(item => {
-            item.addEventListener('click', function() {
-                if(this.id === 'light-switch' || this.id === 'bed') return; // 這兩個是特殊流程
-                currentTaskItem = this;
-                showModal(`處理${this.innerText}中的任務`);
-            });
-        });
+        updateTaskCounter();
     }
 
-    function showModal(text) {
-        document.getElementById('modal-title').innerText = text;
+    // 更新任務計數器顯示
+    function updateTaskCounter() {
+        document.getElementById('count').innerText = finishedTasks;
+    }
+
+    // 顯示任務彈窗
+    function showTaskModal(taskId) {
+        currentTaskItem = document.getElementById(taskId); // 儲存當前點擊的任務景物
+        document.getElementById('modal-title').innerText = allTaskLocations[taskId];
         document.getElementById('task-modal').style.display = 'block';
     }
 
+    // 完成任務
     function completeTask() {
-        document.getElementById('task-modal').style.display = 'none';
+        document.getElementById('task-modal').style.display = 'none'; // 隱藏彈窗
+
         if(currentTaskItem) {
-            currentTaskItem.style.display = 'none';
+            currentTaskItem.style.display = 'none'; // 隱藏該景物的驚嘆號
             finishedTasks++;
-            document.getElementById('count').innerText = finishedTasks;
+            updateTaskCounter();
             
+            // 檢查是否所有任務都已完成
             if(finishedTasks === targetTasks) {
-                alert("任務全部完成！準備睡覺吧。");
-                document.getElementById('light-switch').style.display = 'block';
-                document.getElementById('light-switch').onclick = turnOffLight;
+                showNotification("恭喜！所有睡前任務已完成。現在可以準備睡覺了。", () => {
+                    document.getElementById('light-switch').style.display = 'block'; // 顯示電燈開關
+                    document.getElementById('light-switch').onclick = turnOffLight; // 綁定關燈事件
+                });
             }
         }
     }
 
+    // 關燈 (進入夜晚)
     function turnOffLight() {
-        document.getElementById('room-scene').classList.add('dark');
-        this.style.display = 'none';
-        document.getElementById('bed').style.display = 'block';
-        document.getElementById('bed').onclick = goToSleep;
-    }
+        const roomScene = document.getElementById('room-scene');
+        roomScene.classList.add('night-mode');
+        document.getElementById('light-switch').style.display = 'none'; // 隱藏電燈開關
 
-    function goToSleep() {
-        document.getElementById('room-scene').classList.add('sleep-mode');
-        this.style.display = 'none';
+        isNight = true; // 設置夜晚標誌
         
-        setTimeout(() => {
-            document.getElementById('rooster-sound').play();
-            document.getElementById('room-scene').classList.remove('sleep-mode', 'dark');
-            alert("恭喜你！一夜好眠！");
-        }, 3000);
+        showNotification("天色已晚，該睡覺囉！", () => {
+            document.getElementById('bed').style.display = 'block'; // 顯示床的驚嘆號
+            document.getElementById('bed').onclick = goToSleep; // 綁定睡覺事件
+        });
     }
 
+    // 睡覺 (進入完全黑暗，然後天亮)
+    function goToSleep() {
+        const roomScene = document.getElementById('room-scene');
+        roomScene.classList.add('sleep-mode'); // 完全黑暗
+        document.getElementById('bed').style.display = 'none'; // 隱藏床的驚嘆號
+
+        // 模擬睡覺時間
+        setTimeout(() => {
+            document.getElementById('rooster-sound').play(); // 播放雞叫聲
+            roomScene.classList.remove('sleep-mode', 'night-mode'); // 移除黑暗效果，恢復白天
+            isNight = false; // 設置白天標誌
+
+            showNotification("恭喜你！一夜好眠！", () => {
+                // 遊戲結束或重新開始的邏輯可以在這裡添加
+                // 例如：location.reload(); // 重新載入頁面重玩
+            }, 3000); // 雞叫聲後3秒顯示通知
+        }, 5000); // 5秒後天亮並雞叫
+    }
+
+    // 顯示遊戲通知
+    function showNotification(message, callback = () => {}, delay = 2000) {
+        const notification = document.getElementById('game-notification');
+        document.getElementById('notification-message').innerText = message;
+        notification.style.display = 'block';
+
+        setTimeout(() => {
+            notification.style.display = 'none';
+            callback(); // 執行回調函數
+        }, delay);
+    }
+
+    // 啟動遊戲
     initGame();
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
