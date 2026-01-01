@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>我的可愛房間小遊戲 - 最終修正版</title>
+    <title>我的房間小遊戲</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: "Microsoft JhengHei", sans-serif; }
         
@@ -10,69 +10,48 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* 直接使用網路圖片位址，不用擔心存檔問題 */
-            background-image: url('https://files.catbox.moe/kwa19n.png'); 
+            /* 這裡已經改成你提供的檔名 */
+            background-image: url('Gemini_Generated_Image_evlfdrevlfdrevlf.png'); 
             background-size: cover;
             background-position: center;
             transition: 1.5s filter ease;
         }
 
+        /* 介面樣式 */
         #ui-bar {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            position: absolute; top: 20px; left: 20px;
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px 25px;
-            border: 3px solid #666;
-            border-radius: 30px;
-            font-size: 20px;
-            font-weight: bold;
-            z-index: 100;
+            padding: 10px 25px; border: 3px solid #666;
+            border-radius: 30px; font-size: 20px; font-weight: bold; z-index: 100;
         }
 
         .quest-mark {
-            position: absolute;
-            cursor: pointer;
-            font-size: 45px;
-            color: #FF4444;
-            text-shadow: 2px 2px 5px white;
-            animation: bounce 0.5s infinite alternate;
-            display: none;
-            z-index: 50;
+            position: absolute; cursor: pointer; font-size: 45px;
+            color: #FF4444; text-shadow: 2px 2px 5px white;
+            animation: bounce 0.5s infinite alternate; display: none; z-index: 50;
         }
 
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
 
-        /* --- 針對這張圖物件位置的精確座標 --- */
-        #mark-bath   { top: 52%; left: 8%; }   /* 浴室內洗手台 */
+        /* --- 根據你的成圖精確定位 --- */
+        #mark-bath   { top: 55%; left: 8%; }   /* 浴室洗手台 */
         #mark-desk   { top: 58%; left: 35%; }  /* 書桌 */
         #mark-window { top: 25%; left: 38%; }  /* 窗戶 */
         #mark-trash  { top: 78%; left: 33%; }  /* 垃圾桶 */
         #mark-switch { top: 48%; left: 85%; }  /* 床頭電燈開關 */
-        #mark-bed    { top: 75%; left: 80%; }  /* 床鋪位置 */
+        #mark-bed    { top: 75%; left: 80%; }  /* 床中央 */
 
+        /* 彈出視窗 */
         #pop-up {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #FFF;
-            border: 4px solid #444;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: #FFF;
+            border: 4px solid #444; padding: 30px; border-radius: 15px;
+            text-align: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         #pop-up button {
-            background: #87CEEB;
-            border: none;
-            padding: 10px 25px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 15px;
+            background: #87CEEB; border: none; padding: 10px 25px;
+            font-size: 18px; border-radius: 10px; cursor: pointer; margin-top: 15px;
         }
 
         .night-mode { filter: brightness(0.3) saturate(0.6); }
@@ -84,11 +63,10 @@
 <div id="ui-bar">睡前準備進度: <span id="counter">0</span> / 3</div>
 
 <div id="game-screen">
-    <div id="mark-bath" class="quest-mark" onclick="triggerTask('去浴室刷牙洗臉', 'mark-bath')">❗</div>
-    <div id="mark-desk" class="quest-mark" onclick="triggerTask('把桌上的書收好', 'mark-desk')">❗</div>
-    <div id="mark-window" class="quest-mark" onclick="triggerTask('關上窗戶', 'mark-window')">❗</div>
-    <div id="mark-trash" class="quest-mark" onclick="triggerTask('倒掉垃圾桶垃圾', 'mark-trash')">❗</div>
-
+    <div id="mark-bath" class="quest-mark" onclick="triggerTask('去浴室刷牙', 'mark-bath')">❗</div>
+    <div id="mark-desk" class="quest-mark" onclick="triggerTask('整理書桌', 'mark-desk')">❗</div>
+    <div id="mark-window" class="quest-mark" onclick="triggerTask('關好窗戶', 'mark-window')">❗</div>
+    <div id="mark-trash" class="quest-mark" onclick="triggerTask('倒垃圾', 'mark-trash')">❗</div>
     <div id="mark-switch" class="quest-mark" onclick="clickSwitch()">❗</div>
     <div id="mark-bed" class="quest-mark" onclick="clickBed()">❗</div>
 </div>
@@ -104,7 +82,6 @@
     let finishedCount = 0;
     let activeMarkId = "";
 
-    // 隨機從 4 個物件中挑選 3 個顯示
     const allTaskIds = ['mark-bath', 'mark-desk', 'mark-window', 'mark-trash'];
     const selectedTasks = allTaskIds.sort(() => 0.5 - Math.random()).slice(0, 3);
     selectedTasks.forEach(id => document.getElementById(id).style.display = 'block');
@@ -123,7 +100,7 @@
 
         if(finishedCount === 3) {
             setTimeout(() => {
-                alert("準備好了！最後去「床頭」把燈關掉吧。");
+                alert("準備好了！按一下床頭開關關燈吧。");
                 document.getElementById('mark-switch').style.display = 'block';
             }, 500);
         }
@@ -133,16 +110,14 @@
         document.getElementById('game-screen').classList.add('night-mode');
         document.getElementById('mark-switch').style.display = 'none';
         document.getElementById('mark-bed').style.display = 'block';
-        alert("燈關掉了，去床上睡覺吧。");
     }
 
     function clickBed() {
         document.getElementById('game-screen').classList.add('black-out');
         document.getElementById('mark-bed').style.display = 'none';
-        
         setTimeout(() => {
             document.getElementById('rooster').play();
-            alert("（喔喔喔～）天亮了！新的一天開始了！");
+            alert("天亮了！");
             location.reload(); 
         }, 2500);
     }
