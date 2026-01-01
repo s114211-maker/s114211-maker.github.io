@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>我的可愛房間小遊戲</title>
+    <title>我的可愛房間小遊戲 - 最終修正版</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: "Microsoft JhengHei", sans-serif; }
         
@@ -10,8 +10,8 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* 使用你下載的圖片檔名 */
-            background-image: url('Gemini_Generated_Image_evlfdrevlfdrevlf.png'); 
+            /* 直接使用網路圖片位址，不用擔心存檔問題 */
+            background-image: url('https://files.catbox.moe/kwa19n.png'); 
             background-size: cover;
             background-position: center;
             transition: 1.5s filter ease;
@@ -43,13 +43,13 @@
 
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
 
-        /* --- 根據這張圖精確校準後的座標 --- */
-        #mark-bath   { top: 55%; left: 8%; }   /* 浴室內洗手台 */
+        /* --- 針對這張圖物件位置的精確座標 --- */
+        #mark-bath   { top: 52%; left: 8%; }   /* 浴室內洗手台 */
         #mark-desk   { top: 58%; left: 35%; }  /* 書桌 */
         #mark-window { top: 25%; left: 38%; }  /* 窗戶 */
         #mark-trash  { top: 78%; left: 33%; }  /* 垃圾桶 */
         #mark-switch { top: 48%; left: 85%; }  /* 床頭電燈開關 */
-        #mark-bed    { top: 75%; left: 80%; }  /* 床中央 */
+        #mark-bed    { top: 75%; left: 80%; }  /* 床鋪位置 */
 
         #pop-up {
             display: none;
@@ -104,7 +104,7 @@
     let finishedCount = 0;
     let activeMarkId = "";
 
-    // 隨機從4個挑選3個顯示
+    // 隨機從 4 個物件中挑選 3 個顯示
     const allTaskIds = ['mark-bath', 'mark-desk', 'mark-window', 'mark-trash'];
     const selectedTasks = allTaskIds.sort(() => 0.5 - Math.random()).slice(0, 3);
     selectedTasks.forEach(id => document.getElementById(id).style.display = 'block');
