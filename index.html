@@ -10,8 +10,8 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* 使用剛才生成的這張圖 */
-            background-image: url('https://googleusercontent.com/image_generation_content/0'); 
+            /* 使用你下載的圖片檔名 */
+            background-image: url('Gemini_Generated_Image_evlfdrevlfdrevlf.png'); 
             background-size: cover;
             background-position: center;
             transition: 1.5s filter ease;
@@ -43,12 +43,12 @@
 
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
 
-        /* 根據圖片物件位置精確定位 */
-        #mark-bath   { top: 40%; left: 15%; }  /* 浴室洗手台 */
-        #mark-desk   { top: 52%; left: 45%; }  /* 書桌 */
-        #mark-window { top: 25%; left: 48%; }  /* 窗戶 */
-        #mark-trash  { top: 75%; left: 45%; }  /* 垃圾桶 */
-        #mark-switch { top: 43%; left: 78%; }  /* 床頭開關 */
+        /* --- 根據這張圖精確校準後的座標 --- */
+        #mark-bath   { top: 55%; left: 8%; }   /* 浴室內洗手台 */
+        #mark-desk   { top: 58%; left: 35%; }  /* 書桌 */
+        #mark-window { top: 25%; left: 38%; }  /* 窗戶 */
+        #mark-trash  { top: 78%; left: 33%; }  /* 垃圾桶 */
+        #mark-switch { top: 48%; left: 85%; }  /* 床頭電燈開關 */
         #mark-bed    { top: 75%; left: 80%; }  /* 床中央 */
 
         #pop-up {
@@ -84,10 +84,10 @@
 <div id="ui-bar">睡前準備進度: <span id="counter">0</span> / 3</div>
 
 <div id="game-screen">
-    <div id="mark-bath" class="quest-mark" onclick="triggerTask('去浴室刷牙', 'mark-bath')">❗</div>
-    <div id="mark-desk" class="quest-mark" onclick="triggerTask('整理書桌書本', 'mark-desk')">❗</div>
-    <div id="mark-window" class="quest-mark" onclick="triggerTask('把窗戶關好', 'mark-window')">❗</div>
-    <div id="mark-trash" class="quest-mark" onclick="triggerTask('清理垃圾桶', 'mark-trash')">❗</div>
+    <div id="mark-bath" class="quest-mark" onclick="triggerTask('去浴室刷牙洗臉', 'mark-bath')">❗</div>
+    <div id="mark-desk" class="quest-mark" onclick="triggerTask('把桌上的書收好', 'mark-desk')">❗</div>
+    <div id="mark-window" class="quest-mark" onclick="triggerTask('關上窗戶', 'mark-window')">❗</div>
+    <div id="mark-trash" class="quest-mark" onclick="triggerTask('倒掉垃圾桶垃圾', 'mark-trash')">❗</div>
 
     <div id="mark-switch" class="quest-mark" onclick="clickSwitch()">❗</div>
     <div id="mark-bed" class="quest-mark" onclick="clickBed()">❗</div>
@@ -123,7 +123,7 @@
 
         if(finishedCount === 3) {
             setTimeout(() => {
-                alert("都準備好了，按一下床頭開關關燈吧！");
+                alert("準備好了！最後去「床頭」把燈關掉吧。");
                 document.getElementById('mark-switch').style.display = 'block';
             }, 500);
         }
@@ -133,6 +133,7 @@
         document.getElementById('game-screen').classList.add('night-mode');
         document.getElementById('mark-switch').style.display = 'none';
         document.getElementById('mark-bed').style.display = 'block';
+        alert("燈關掉了，去床上睡覺吧。");
     }
 
     function clickBed() {
