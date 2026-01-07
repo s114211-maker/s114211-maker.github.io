@@ -3,63 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>睡眠提案：今晚的時數分配</title>
+    <title>睡眠提案 (๑´ㅂ`๑)</title>
     <style>
         :root {
-            --bg-color: #f7f3f0;
-            --primary-blue: #a3bac3;
-            --accent-red: #d9b3b3;
-            --text-dark: #5a5a5a;
-            --border-color: #e0e0e0;
+            --bg: #fdfdfd;
+            --mint: #e1f4f3;
+            --rose: #f9e1e1;
+            --sand: #fcf1d8;
+            --gray: #e8e8e8;
+            --text: #4a4a4a;
         }
 
         body { 
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-dark); 
+            font-family: "Helvetica Neue", "Helvetica", "Arial", "Microsoft JhengHei", sans-serif; 
+            background: var(--bg); color: var(--text); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             min-height: 100vh; margin: 0; 
         }
 
-        h1 { font-weight: 300; letter-spacing: 4px; margin-bottom: 40px; color: var(--text-dark); }
+        h1 { font-weight: 300; letter-spacing: 5px; margin-bottom: 30px; color: #7a7a7a; }
         
-        .wheel-box { position: relative; width: 400px; height: 400px; }
+        .wheel-box { position: relative; width: 420px; height: 420px; }
         
-        /* 極簡風格指針 */
+        /* 極簡細針 */
         .pointer { 
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            width: 2px; height: 40px; background: var(--text-dark); z-index: 10; 
-        }
-        .pointer::after {
-            content: ''; position: absolute; bottom: -5px; left: -4px;
-            border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 10px solid var(--text-dark);
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%); 
+            width: 2px; height: 50px; background: #ff7e67; z-index: 10; 
         }
 
         canvas { 
             width: 100%; height: 100%; border-radius: 50%; 
-            border: 2px solid var(--border-color);
-            transition: transform 5s cubic-bezier(0.2, 0, 0.2, 1); 
+            border: 5px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); 
         }
 
-        .controls { margin-top: 50px; }
+        .controls { margin-top: 40px; }
         button { 
-            padding: 12px 60px; font-size: 1rem; cursor: pointer; border-radius: 2px; 
-            border: 1px solid var(--text-dark); background: transparent; color: var(--text-dark); 
+            padding: 12px 50px; font-size: 1.1rem; cursor: pointer; border-radius: 30px; 
+            border: 1px solid #ccc; background: #fff; color: #777; 
             transition: all 0.3s; letter-spacing: 2px;
         }
-        button:hover { background: var(--text-dark); color: #fff; }
-        button:disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; }
+        button:hover { border-color: #ff7e67; color: #ff7e67; background: #fff5f3; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        #result { margin-top: 30px; font-size: 1.5rem; font-weight: 300; height: 1.8rem; }
+        #result { margin-top: 25px; font-size: 1.6rem; color: #ff7e67; font-weight: 400; }
         #comment { 
-            margin-top: 15px; font-size: 0.95rem; color: #888; 
-            max-width: 300px; text-align: center; line-height: 1.6; 
+            margin-top: 15px; font-size: 1rem; color: #999; 
+            max-width: 320px; text-align: center; line-height: 1.6; min-height: 3rem;
         }
     </style>
 </head>
 <body>
 
-    <h1>睡眠提案</h1>
+    <h1>睡眠提案 ( ˘ω˘ )</h1>
     
     <div class="wheel-box">
         <div class="pointer"></div>
@@ -67,7 +63,7 @@
     </div>
 
     <div class="controls">
-        <button id="spinBtn">抽取今晚</button>
+        <button id="spinBtn">抽取今晚 (・ω・)ノ</button>
     </div>
 
     <div id="result"></div>
@@ -80,28 +76,27 @@
         const resultText = document.getElementById('result');
         const commentText = document.getElementById('comment');
 
-        // 選項：優雅的諧音與冷幽默
+        // 選項：冷幽默 + 諧音 + 顏文字
         const data = [
-            { label: "通宵", msg: "今晚的星星很美，你打算看它們一整晚。" },
-            { label: "8 小時", msg: "這是一場睡眠界的豪華旅行。" },
-            { label: "30 分鐘", msg: "這只是一場稍微長一點的眨眼。" },
-            { label: "6 小時", msg: "『陸』續補眠中，維持人類機能的底線。" },
-            { label: "再來一次", msg: "命運似乎想重新提案。" },
-            { label: "15 分鐘", msg: "這段時間只夠大腦說聲午安就又要說早安。" },
-            { label: "7 小時", msg: "『妻』（七）望與現實最完美的平衡。" },
-            { label: "睡一整天", msg: "這不是懶，這是對床的深度尊重。" },
-            { label: "5 小時", msg: "『五』力全開，明天請多準備兩杯咖啡。" },
-            { label: "1 小時", msg: "『醫』點都不夠，身體發出了無聲的抗議。" },
-            { label: "4 小時", msg: "介於清醒與夢遊之間的灰色地帶。" },
-            { label: "再來一次", msg: "轉盤建議您換個心情再出發。" },
-            { label: "8 小時", msg: "恭喜獲得與枕頭的深度對話時間。" },
-            { label: "20 分鐘", msg: "這叫縮時睡眠，節省時間的最佳典範。" },
-            { label: "6 小時", msg: "平凡的六小時，平凡的幸福感。" },
-            { label: "睡到自然醒", msg: "最昂貴的奢侈品，就是沒有鬧鐘的早晨。" }
+            { label: "通宵", msg: "今晚不睡，真的很『肝』尬呢... ( ;´д｀)" },
+            { label: "8 小時", msg: "居然睡飽了，你是睡眠界的富翁 ( °ω° )" },
+            { label: "30 分鐘", msg: "這不是睡覺，這只是大腦稍微斷片 (ﾟдﾟ)" },
+            { label: "6 小時", msg: "『陸』續補眠中，機能勉強維持 (´-ω-`)" },
+            { label: "再來一次", msg: "命運覺得這個時數不太行，請重抽 ( ᐛ )" },
+            { label: "15 分鐘", msg: "這時間短到，連夢都還沒開始寫 ( ¯•ω•¯ )" },
+            { label: "7 小時", msg: "『妻』（七）期望中的平衡點，恭喜了 (´▽｀)" },
+            { label: "睡一整天", msg: "你是睡覺界的一『直』標竿呢 (¦3[▓▓]" },
+            { label: "5 小時", msg: "『五』力全開！雖然只有五小時... (ง'̀-'́)ง" },
+            { label: "1 小時", msg: "『醫』點都不夠，請多保重身體 (´;ω;`)" },
+            { label: "4 小時", msg: "半夢半醒之間，看誰都像外星人 (⊙ˍ⊙)" },
+            { label: "再來一次", msg: "手滑了嗎？再給你一次機會 (๑•̀ㅂ•́)و" },
+            { label: "8 小時", msg: "神清氣爽，感覺可以去打老虎了 ✨ (✧◡✧)" },
+            { label: "10 分鐘", msg: "這真的太『拾』分不足了呀 (´Д` )" },
+            { label: "6 小時", msg: "普通的六小時，普通的快樂 (・∀・)" },
+            { label: "睡到爽", msg: "枕頭對你發出了熱情的邀請 ヽ(✿ﾟ▽ﾟ)ノ" }
         ];
         
-        // 莫蘭迪配色 (煙燻藍、乾燥粉、米灰、奶茶)
-        const colors = ["#a3bac3", "#d9b3b3", "#ebe3d5", "#c9c0bb"];
+        const colors = ["#e1f4f3", "#f9e1e1", "#fcf1d8", "#e8e8e8"];
         const numSegments = data.length;
         const arc = 2 * Math.PI / numSegments;
         let currentAngle = 0;
@@ -124,7 +119,7 @@
                 ctx.translate(250, 250);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = "#5a5a5a";
+                ctx.fillStyle = "#666";
                 ctx.font = "16px sans-serif";
                 ctx.fillText(item.label, 230, 6);
                 ctx.restore();
@@ -135,10 +130,10 @@
 
         function spin() {
             btn.disabled = true;
-            resultText.innerText = "正在為您挑選時段...";
+            resultText.innerText = "挑選中... ( ˘ω˘ )";
             commentText.style.display = "none";
             
-            const spinAngle = Math.floor(Math.random() * 360) + 3600; 
+            const spinAngle = Math.floor(Math.random() * 360) + 4320; 
             currentAngle += spinAngle;
             canvas.style.transform = `rotate(${currentAngle}deg)`;
 
@@ -147,7 +142,7 @@
                 const winningIndex = Math.floor(((360 - actualRotation + 270) % 360) / (360 / numSegments));
                 const finalResult = data[winningIndex];
                 
-                resultText.innerText = finalResult.label;
+                resultText.innerText = finalResult.label + " ✨";
                 commentText.innerText = finalResult.msg;
                 commentText.style.display = "block";
                 
