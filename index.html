@@ -2,126 +2,57 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>我的房間小遊戲</title>
+    <title>今晚睡多久？轉盤</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: "Microsoft JhengHei", sans-serif; }
-        
-        #game-screen {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            /* 這裡已經改成你提供的檔名 */
-            background-image: url('Gemini_Generated_Image_evlfdrevlfdrevlf.png'); 
-            background-size: cover;
-            background-position: center;
-            transition: 1.5s filter ease;
+        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #2c3e50; color: white; margin: 0; }
+        .wheel-container { position: relative; width: 350px; height: 350px; }
+        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #ecf0f1; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            background: conic-gradient(
+                #e74c3c 0deg 45deg, #e67e22 45deg 90deg, #f1c40f 90deg 135deg, #2ecc71 135deg 180deg,
+                #3498db 180deg 225deg, #9b59b6 225deg 270deg, #1abc9c 270deg 315deg, #34495e 315deg 360deg
+            );
         }
-
-        /* 介面樣式 */
-        #ui-bar {
-            position: absolute; top: 20px; left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 25px; border: 3px solid #666;
-            border-radius: 30px; font-size: 20px; font-weight: bold; z-index: 100;
-        }
-
-        .quest-mark {
-            position: absolute; cursor: pointer; font-size: 45px;
-            color: #FF4444; text-shadow: 2px 2px 5px white;
-            animation: bounce 0.5s infinite alternate; display: none; z-index: 50;
-        }
-
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
-
-        /* --- 根據你的成圖精確定位 --- */
-        #mark-bath   { top: 55%; left: 8%; }   /* 浴室洗手台 */
-        #mark-desk   { top: 58%; left: 35%; }  /* 書桌 */
-        #mark-window { top: 25%; left: 38%; }  /* 窗戶 */
-        #mark-trash  { top: 78%; left: 33%; }  /* 垃圾桶 */
-        #mark-switch { top: 48%; left: 85%; }  /* 床頭電燈開關 */
-        #mark-bed    { top: 75%; left: 80%; }  /* 床中央 */
-
-        /* 彈出視窗 */
-        #pop-up {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: #FFF;
-            border: 4px solid #444; padding: 30px; border-radius: 15px;
-            text-align: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        #pop-up button {
-            background: #87CEEB; border: none; padding: 10px 25px;
-            font-size: 18px; border-radius: 10px; cursor: pointer; margin-top: 15px;
-        }
-
-        .night-mode { filter: brightness(0.3) saturate(0.6); }
-        .black-out { filter: brightness(0); }
+        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #f1c40f; z-index: 10; }
+        button { margin-top: 30px; padding: 10px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 20px; border: none; background: #e74c3c; color: white; transition: 0.3s; }
+        button:hover { background: #c0392b; transform: scale(1.1); }
+        #result { margin-top: 20px; font-size: 1.5rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="ui-bar">睡前準備進度: <span id="counter">0</span> / 3</div>
+    <h1>🌙 今晚睡覺時數抽獎機</h1>
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div id="wheel"></div>
+    </div>
+    <button onclick="spin()">開始命運轉盤！</button>
+    <div id="result">點擊按鈕，決定你的睡眠時數</div>
 
-<div id="game-screen">
-    <div id="mark-bath" class="quest-mark" onclick="triggerTask('去浴室刷牙', 'mark-bath')">❗</div>
-    <div id="mark-desk" class="quest-mark" onclick="triggerTask('整理書桌', 'mark-desk')">❗</div>
-    <div id="mark-window" class="quest-mark" onclick="triggerTask('關好窗戶', 'mark-window')">❗</div>
-    <div id="mark-trash" class="quest-mark" onclick="triggerTask('倒垃圾', 'mark-trash')">❗</div>
-    <div id="mark-switch" class="quest-mark" onclick="clickSwitch()">❗</div>
-    <div id="mark-bed" class="quest-mark" onclick="clickBed()">❗</div>
-</div>
+    <script>
+        let currentRotation = 0;
+        const sleepHours = ["1小時(慘)", "4小時", "6小時", "8小時(健康)", "10小時", "12小時(豬)", "不准睡(爆肝)", "隨便睡"];
 
-<div id="pop-up">
-    <h3 id="task-name">任務</h3>
-    <button onclick="finishCurrentTask()">完成！</button>
-</div>
+        function spin() {
+            const btn = document.querySelector('button');
+            btn.disabled = true;
+            
+            // 隨機旋轉 5~10 圈 + 隨機角度
+            const extraDegree = Math.floor(Math.random() * 360);
+            const totalDegree = 1800 + extraDegree; 
+            currentRotation += totalDegree;
+            
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-<audio id="rooster" src="https://assets.mixkit.co/sfx/preview/mixkit-rooster-crowing-in-the-morning-2435.mp3"></audio>
+            // 計算結果 (逆時針計算對應區塊)
+            const actualDegree = (360 - (currentRotation % 360)) % 360;
+            const index = Math.floor(actualDegree / 45);
 
-<script>
-    let finishedCount = 0;
-    let activeMarkId = "";
-
-    const allTaskIds = ['mark-bath', 'mark-desk', 'mark-window', 'mark-trash'];
-    const selectedTasks = allTaskIds.sort(() => 0.5 - Math.random()).slice(0, 3);
-    selectedTasks.forEach(id => document.getElementById(id).style.display = 'block');
-
-    function triggerTask(name, id) {
-        activeMarkId = id;
-        document.getElementById('task-name').innerText = name;
-        document.getElementById('pop-up').style.display = 'block';
-    }
-
-    function finishCurrentTask() {
-        document.getElementById('pop-up').style.display = 'none';
-        document.getElementById(activeMarkId).style.display = 'none';
-        finishedCount++;
-        document.getElementById('counter').innerText = finishedCount;
-
-        if(finishedCount === 3) {
             setTimeout(() => {
-                alert("準備好了！按一下床頭開關關燈吧。");
-                document.getElementById('mark-switch').style.display = 'block';
-            }, 500);
+                document.getElementById('result').innerText = `結果是：${sleepHours[index]}！`;
+                btn.disabled = false;
+            }, 4000);
         }
-    }
-
-    function clickSwitch() {
-        document.getElementById('game-screen').classList.add('night-mode');
-        document.getElementById('mark-switch').style.display = 'none';
-        document.getElementById('mark-bed').style.display = 'block';
-    }
-
-    function clickBed() {
-        document.getElementById('game-screen').classList.add('black-out');
-        document.getElementById('mark-bed').style.display = 'none';
-        setTimeout(() => {
-            document.getElementById('rooster').play();
-            alert("天亮了！");
-            location.reload(); 
-        }, 2500);
-    }
-</script>
-
+    </script>
 </body>
 </html>
