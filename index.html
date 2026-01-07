@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>睡眠命運轉盤</title>
+    <title>今晚命運：睡眠時數</title>
     <style>
-        body { font-family: 'Microsoft JhengHei', sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        h1 { margin-bottom: 20px; color: #00adb5; text-shadow: 0 0 15px rgba(0,173,181,0.5); }
+        /* 普普風撞色設計 */
+        body { font-family: 'Microsoft JhengHei', sans-serif; background: #ffde7d; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        h1 { margin-bottom: 20px; color: #f6416c; font-size: 2.8rem; text-shadow: 3px 3px 0px #fff; }
         
-        .wheel-box { position: relative; width: 420px; height: 420px; }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid #ff5722; z-index: 10; }
+        .wheel-box { position: relative; width: 450px; height: 450px; border: 15px solid #333; border-radius: 50%; background: #333; }
+        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 45px solid #333; z-index: 10; }
 
-        canvas { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #393e46; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
+        canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
 
         .controls { margin-top: 30px; }
-        button { padding: 15px 40px; font-size: 1.3rem; cursor: pointer; border-radius: 50px; border: none; background: #00adb5; color: #fff; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        button:hover { background: #00fff5; color: #222831; transform: scale(1.05); }
-        button:disabled { background: #555; cursor: not-allowed; }
+        button { padding: 15px 45px; font-size: 1.5rem; cursor: pointer; border-radius: 50px; border: 4px solid #333; background: #00b8a9; color: #fff; font-weight: 900; box-shadow: 6px 6px 0px #333; transition: 0.1s; }
+        button:hover { background: #f6416c; transform: translate(-2px, -2px); box-shadow: 8px 8px 0px #333; }
+        button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #333; }
+        button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
-        #result { margin-top: 20px; font-size: 1.8rem; font-weight: bold; color: #f9ed69; height: 2.5rem; }
-        #comment { margin-top: 10px; font-size: 1.2rem; color: #ff5722; font-style: italic; min-height: 1.5rem; }
+        #result { margin-top: 25px; font-size: 2rem; font-weight: 900; color: #f6416c; }
+        #comment { margin-top: 10px; font-size: 1.3rem; color: #333; font-weight: bold; background: #fff; padding: 10px 20px; border: 3px solid #333; border-radius: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <h1>🌙 睡眠命運轉盤</h1>
+    <h1>🎡 睡眠大樂透</h1>
     
     <div class="wheel-box">
         <div class="pointer"></div>
@@ -32,7 +34,7 @@
     </div>
 
     <div class="controls">
-        <button id="spinBtn">決定今晚睡多久</button>
+        <button id="spinBtn">啟動命運！</button>
     </div>
 
     <div id="result"></div>
@@ -45,23 +47,22 @@
         const resultText = document.getElementById('result');
         const commentText = document.getElementById('comment');
 
-        // 選項與對應的搞笑評論
         const data = [
-            { label: "6 小時", msg: "還行啦，勉強算是有在呼吸。" },
-            { label: "通宵", msg: "恭喜！你的肝正在對你發出求救訊號。" },
-            { label: "8 小時", msg: "神清氣爽！你的人生贏家劇本已開寫。" },
-            { label: "30 分鐘", msg: "這不是睡覺，這叫斷片。" },
-            { label: "7 小時", msg: "標準的打工人睡眠，精神體力 70%。" },
-            { label: "再來一次", msg: "命運都不忍心看你睡這麼少，重抽！" },
-            { label: "5 小時", msg: "身體要壞了，黑眼圈已經掉到下巴了。" },
-            { label: "一整天", msg: "你是睡覺還是冬眠？記得設鬧鐘吃晚餐。" },
-            { label: "1 小時", msg: "這叫「快速關機再啟動」，遲早會燒壞。" },
-            { label: "15 分鐘", msg: "恭喜獲得「熊貓眼」Buff 加成！" },
-            { label: "睡到自然醒", msg: "夢想中的生活！你的鬧鐘已氣到離家出走。" },
-            { label: "再來一次", msg: "運氣也是實力的一種，再給你一次機會。" }
+            { label: "1 小時", msg: "這不是睡覺，這只是手機充電充到 5% 就拔掉。" },
+            { label: "8 小時", msg: "居然睡滿了！你是剛從平行時空回來的嗎？" },
+            { label: "通宵", msg: "恭喜獲得「暗黑破壞神」稱號，你是夜晚的王！" },
+            { label: "6 小時", msg: "靈魂出竅了一半，還有一半在鬧鐘那裡。" },
+            { label: "再來一次", msg: "這手氣連轉盤都看不下去，給你個平反的機會！" },
+            { label: "睡一整天", msg: "醒來發現已經換了一個季節，我是誰我在哪？" },
+            { label: "30 分鐘", msg: "只是眼睛閉比較久而已，別騙自己是在睡覺。" },
+            { label: "7 小時", msg: "標準的養生模範生，你的身體向你敬禮。" },
+            { label: "15 分鐘", msg: "這是所謂的「秒睡秒醒」傳說嗎？" },
+            { label: "5 小時", msg: "咖啡因將成為你今生最好的戰友。" },
+            { label: "睡到飽", msg: "枕頭對你發出了熱情的邀請，請務必應約！" },
+            { label: "再來一次", msg: "命運叫你再轉一次，可能是有大獎在等你？" }
         ];
         
-        const colors = ["#222831", "#393e46", "#00adb5", "#eeeeee"];
+        const colors = ["#f6416c", "#ffde7d", "#00b8a9", "#f8f3d4", "#ff9a3c", "#40514e"];
         const numSegments = data.length;
         const arc = 2 * Math.PI / numSegments;
         let currentAngle = 0;
@@ -75,13 +76,14 @@
                 ctx.arc(250, 250, 250, angle, angle + arc);
                 ctx.lineTo(250, 250);
                 ctx.fill();
+                ctx.stroke();
 
                 ctx.save();
                 ctx.translate(250, 250);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = (colors[i % colors.length] === "#eeeeee") ? "#222831" : "#fff";
-                ctx.font = "bold 18px Arial";
+                ctx.fillStyle = (colors[i % colors.length] === "#f8f3d4" || colors[i % colors.length] === "#ffde7d") ? "#333" : "#fff";
+                ctx.font = "bold 20px Arial";
                 ctx.fillText(item.label, 230, 10);
                 ctx.restore();
             });
@@ -91,12 +93,11 @@
 
         function spin() {
             btn.disabled = true;
-            resultText.innerText = "轉動中...";
-            commentText.innerText = "";
+            resultText.innerText = "轉動中...夢想成真中...";
+            commentText.style.display = "none";
             
             const spinAngle = Math.floor(Math.random() * 360) + 3600; 
             currentAngle += spinAngle;
-            
             canvas.style.transform = `rotate(${currentAngle}deg)`;
 
             setTimeout(() => {
@@ -104,16 +105,18 @@
                 const winningIndex = Math.floor(((360 - actualRotation + 270) % 360) / (360 / numSegments));
                 const finalResult = data[winningIndex];
                 
-                resultText.innerText = `結果：${finalResult.label}`;
+                resultText.innerText = `最終結果：${finalResult.label}`;
                 commentText.innerText = finalResult.msg;
+                commentText.style.display = "block";
                 
-                if(finalResult.label === "再來一次") {
-                    setTimeout(() => { btn.disabled = false; }, 1000);
-                } else {
-                    btn.disabled = false;
-                }
+                btn.disabled = false;
             }, 5000);
         }
+
+        btn.addEventListener('click', spin);
+    </script>
+</body>
+</html>
 
         btn.addEventListener('click', spin);
     </script>
