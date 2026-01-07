@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今晚命運：睡眠時數</title>
+    <title>今晚命運：睡眠大樂透</title>
     <style>
-        /* 普普風撞色設計 */
-        body { font-family: 'Microsoft JhengHei', sans-serif; background: #ffde7d; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        h1 { margin-bottom: 20px; color: #f6416c; font-size: 2.8rem; text-shadow: 3px 3px 0px #fff; }
+        body { font-family: 'Microsoft JhengHei', sans-serif; background: #222831; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        h1 { margin-bottom: 20px; color: #f9ed69; font-size: 2.5rem; text-shadow: 2px 2px #b83b5e; }
         
-        .wheel-box { position: relative; width: 450px; height: 450px; border: 15px solid #333; border-radius: 50%; background: #333; }
-        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 45px solid #333; z-index: 10; }
+        /* 轉盤外框 */
+        .wheel-box { position: relative; width: 450px; height: 450px; border: 12px solid #393e46; border-radius: 50%; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .pointer { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 45px solid #f9ed69; z-index: 10; }
 
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
 
-        .controls { margin-top: 30px; }
-        button { padding: 15px 45px; font-size: 1.5rem; cursor: pointer; border-radius: 50px; border: 4px solid #333; background: #00b8a9; color: #fff; font-weight: 900; box-shadow: 6px 6px 0px #333; transition: 0.1s; }
-        button:hover { background: #f6416c; transform: translate(-2px, -2px); box-shadow: 8px 8px 0px #333; }
-        button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #333; }
-        button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        .controls { margin-top: 40px; }
+        button { padding: 15px 50px; font-size: 1.4rem; cursor: pointer; border-radius: 50px; border: none; background: #b83b5e; color: #fff; font-weight: 900; transition: 0.3s; box-shadow: 0 5px 0 #6a2c70; }
+        button:hover { background: #f08a5d; transform: scale(1.05); }
+        button:active { transform: translateY(5px); box-shadow: none; }
+        button:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
 
-        #result { margin-top: 25px; font-size: 2rem; font-weight: 900; color: #f6416c; }
-        #comment { margin-top: 10px; font-size: 1.3rem; color: #333; font-weight: bold; background: #fff; padding: 10px 20px; border: 3px solid #333; border-radius: 10px; display: none; }
+        #result { margin-top: 25px; font-size: 2rem; font-weight: 900; color: #f9ed69; height: 2.5rem; }
+        #comment { margin-top: 15px; font-size: 1.25rem; color: #eee; background: rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 15px; display: none; text-align: center; border: 1px dashed #f9ed69; }
     </style>
 </head>
 <body>
 
-    <h1>🎡 睡眠大樂透</h1>
+    <h1>🎡 睡眠命運大樂透</h1>
     
     <div class="wheel-box">
         <div class="pointer"></div>
@@ -34,7 +34,7 @@
     </div>
 
     <div class="controls">
-        <button id="spinBtn">啟動命運！</button>
+        <button id="spinBtn">決定今晚命運</button>
     </div>
 
     <div id="result"></div>
@@ -47,22 +47,27 @@
         const resultText = document.getElementById('result');
         const commentText = document.getElementById('comment');
 
+        // 更新後：更幽默的 16 格配置
         const data = [
-            { label: "1 小時", msg: "這不是睡覺，這只是手機充電充到 5% 就拔掉。" },
-            { label: "8 小時", msg: "居然睡滿了！你是剛從平行時空回來的嗎？" },
-            { label: "通宵", msg: "恭喜獲得「暗黑破壞神」稱號，你是夜晚的王！" },
-            { label: "6 小時", msg: "靈魂出竅了一半，還有一半在鬧鐘那裡。" },
-            { label: "再來一次", msg: "這手氣連轉盤都看不下去，給你個平反的機會！" },
-            { label: "睡一整天", msg: "醒來發現已經換了一個季節，我是誰我在哪？" },
-            { label: "30 分鐘", msg: "只是眼睛閉比較久而已，別騙自己是在睡覺。" },
-            { label: "7 小時", msg: "標準的養生模範生，你的身體向你敬禮。" },
-            { label: "15 分鐘", msg: "這是所謂的「秒睡秒醒」傳說嗎？" },
-            { label: "5 小時", msg: "咖啡因將成為你今生最好的戰友。" },
-            { label: "睡到飽", msg: "枕頭對你發出了熱情的邀請，請務必應約！" },
-            { label: "再來一次", msg: "命運叫你再轉一次，可能是有大獎在等你？" }
+            { label: "6 小時", msg: "人類進化的最低限度，剛好夠你記得自己的名字。" },
+            { label: "通宵", msg: "恭喜！你是夜晚的王，但可能是明天的亡。" },
+            { label: "8 小時", msg: "奢侈！這種睡眠時數在我們這區是可以拿出來炫耀的。" },
+            { label: "30 分鐘", msg: "這不是睡覺，這只是大腦系統重新整理中。" },
+            { label: "7 小時", msg: "非常標準的平凡人，平凡就是一種幸福。" },
+            { label: "再來一次", msg: "轉盤覺得你今晚不該只睡這樣，再給你一次改命的機會！" },
+            { label: "5 小時", msg: "咖啡因將是你今晚最好的戰友，準備好乾杯了嗎？" },
+            { label: "睡一整天", msg: "你是睡覺還是冬眠？醒來記得去確認一下現在是哪一年。" },
+            { label: "6 小時", msg: "剛好可以維持基本社交能力的時數。" },
+            { label: "1 小時", msg: "這是所謂的『試睡員』嗎？試了一下就醒了。" },
+            { label: "8 小時", msg: "神清氣爽！你現在的狀態可以去打老虎了。" },
+            { label: "再來一次", msg: "命運的齒輪卡住了，請再撥動它一次。" },
+            { label: "7 小時", msg: "身體健康，萬事如意，你簡直是班上的養生傳奇。" },
+            { label: "15 分鐘", msg: "這叫『閉目養神』，老師在台上講話的時間都比這久。" },
+            { label: "5 小時", msg: "雖然有點累，但至少你的大腦還在服務區內。" },
+            { label: "睡到爽", msg: "夢想成真！建議關掉鬧鐘，並把它丟出窗外。" }
         ];
         
-        const colors = ["#f6416c", "#ffde7d", "#00b8a9", "#f8f3d4", "#ff9a3c", "#40514e"];
+        const colors = ["#b83b5e", "#f08a5d", "#f9ed69", "#393e46"];
         const numSegments = data.length;
         const arc = 2 * Math.PI / numSegments;
         let currentAngle = 0;
@@ -76,15 +81,19 @@
                 ctx.arc(250, 250, 250, angle, angle + arc);
                 ctx.lineTo(250, 250);
                 ctx.fill();
+                
+                // 畫分隔線讓質感更好
+                ctx.strokeStyle = "#222831";
+                ctx.lineWidth = 2;
                 ctx.stroke();
 
                 ctx.save();
                 ctx.translate(250, 250);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = (colors[i % colors.length] === "#f8f3d4" || colors[i % colors.length] === "#ffde7d") ? "#333" : "#fff";
-                ctx.font = "bold 20px Arial";
-                ctx.fillText(item.label, 230, 10);
+                ctx.fillStyle = (colors[i % colors.length] === "#f9ed69") ? "#333" : "#fff";
+                ctx.font = "bold 16px Arial";
+                ctx.fillText(item.label, 230, 8);
                 ctx.restore();
             });
         }
@@ -93,10 +102,11 @@
 
         function spin() {
             btn.disabled = true;
-            resultText.innerText = "轉動中...夢想成真中...";
+            resultText.innerText = "命運正在加載中...";
             commentText.style.display = "none";
             
-            const spinAngle = Math.floor(Math.random() * 360) + 3600; 
+            // 增加隨機性與圈數
+            const spinAngle = Math.floor(Math.random() * 360) + 4320; 
             currentAngle += spinAngle;
             canvas.style.transform = `rotate(${currentAngle}deg)`;
 
@@ -112,11 +122,6 @@
                 btn.disabled = false;
             }, 5000);
         }
-
-        btn.addEventListener('click', spin);
-    </script>
-</body>
-</html>
 
         btn.addEventListener('click', spin);
     </script>
