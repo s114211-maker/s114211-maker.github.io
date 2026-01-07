@@ -7,49 +7,52 @@
     <style>
         :root {
             --bg: #fdfdfd;
-            --mint: #e1f4f3;
-            --rose: #f9e1e1;
-            --sand: #fcf1d8;
-            --gray: #e8e8e8;
             --text: #4a4a4a;
+            --highlight: #ff6b6b;
         }
 
         body { 
-            font-family: "Helvetica Neue", "Helvetica", "Arial", "Microsoft JhengHei", sans-serif; 
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
             background: var(--bg); color: var(--text); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            min-height: 100vh; margin: 0; 
+            min-height: 100vh; margin: 0; padding: 20px;
         }
 
-        h1 { font-weight: 300; letter-spacing: 5px; margin-bottom: 30px; color: #7a7a7a; }
+        h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: 5px; margin-bottom: 30px; color: #555; }
         
-        .wheel-box { position: relative; width: 420px; height: 420px; }
+        .wheel-box { position: relative; width: 450px; height: 450px; }
         
-        /* 極簡細針 */
+        /* 醒目的紅色指標 */
         .pointer { 
-            position: absolute; top: -15px; left: 50%; transform: translateX(-50%); 
-            width: 2px; height: 50px; background: #ff7e67; z-index: 10; 
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%); 
+            width: 4px; height: 60px; background: var(--highlight); z-index: 10; 
+            border-radius: 2px;
+        }
+        .pointer::after {
+            content: ''; position: absolute; bottom: -10px; left: -8px;
+            border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid var(--highlight);
         }
 
         canvas { 
             width: 100%; height: 100%; border-radius: 50%; 
-            border: 5px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 8px solid #fff; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); 
         }
 
-        .controls { margin-top: 40px; }
+        .controls { margin-top: 50px; }
         button { 
-            padding: 12px 50px; font-size: 1.1rem; cursor: pointer; border-radius: 30px; 
-            border: 1px solid #ccc; background: #fff; color: #777; 
-            transition: all 0.3s; letter-spacing: 2px;
+            padding: 15px 60px; font-size: 1.5rem; cursor: pointer; border-radius: 50px; 
+            border: 2px solid var(--highlight); background: #fff; color: var(--highlight); 
+            transition: all 0.3s; font-weight: bold; box-shadow: 0 4px 15px rgba(255,107,107,0.2);
         }
-        button:hover { border-color: #ff7e67; color: #ff7e67; background: #fff5f3; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:hover { background: var(--highlight); color: #fff; transform: translateY(-3px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        #result { margin-top: 25px; font-size: 1.6rem; color: #ff7e67; font-weight: 400; }
+        /* 結果顯示區：大字體 */
+        #result { margin-top: 35px; font-size: 2.5rem; color: var(--highlight); font-weight: 800; min-height: 3rem; }
         #comment { 
-            margin-top: 15px; font-size: 1rem; color: #999; 
-            max-width: 320px; text-align: center; line-height: 1.6; min-height: 3rem;
+            margin-top: 20px; font-size: 1.6rem; color: #666; 
+            max-width: 500px; text-align: center; line-height: 1.5; font-weight: 500;
         }
     </style>
 </head>
@@ -59,7 +62,7 @@
     
     <div class="wheel-box">
         <div class="pointer"></div>
-        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        <canvas id="wheelCanvas" width="600" height="600"></canvas>
     </div>
 
     <div class="controls">
@@ -76,27 +79,27 @@
         const resultText = document.getElementById('result');
         const commentText = document.getElementById('comment');
 
-        // 選項：冷幽默 + 諧音 + 顏文字
         const data = [
-            { label: "通宵", msg: "今晚不睡，真的很『肝』尬呢... ( ;´д｀)" },
-            { label: "8 小時", msg: "居然睡飽了，你是睡眠界的富翁 ( °ω° )" },
-            { label: "30 分鐘", msg: "這不是睡覺，這只是大腦稍微斷片 (ﾟдﾟ)" },
-            { label: "6 小時", msg: "『陸』續補眠中，機能勉強維持 (´-ω-`)" },
-            { label: "再來一次", msg: "命運覺得這個時數不太行，請重抽 ( ᐛ )" },
-            { label: "15 分鐘", msg: "這時間短到，連夢都還沒開始寫 ( ¯•ω•¯ )" },
-            { label: "7 小時", msg: "『妻』（七）期望中的平衡點，恭喜了 (´▽｀)" },
-            { label: "睡一整天", msg: "你是睡覺界的一『直』標竿呢 (¦3[▓▓]" },
-            { label: "5 小時", msg: "『五』力全開！雖然只有五小時... (ง'̀-'́)ง" },
-            { label: "1 小時", msg: "『醫』點都不夠，請多保重身體 (´;ω;`)" },
-            { label: "4 小時", msg: "半夢半醒之間，看誰都像外星人 (⊙ˍ⊙)" },
-            { label: "再來一次", msg: "手滑了嗎？再給你一次機會 (๑•̀ㅂ•́)و" },
-            { label: "8 小時", msg: "神清氣爽，感覺可以去打老虎了 ✨ (✧◡✧)" },
-            { label: "10 分鐘", msg: "這真的太『拾』分不足了呀 (´Д` )" },
+            { label: "通宵", msg: "真的很『肝』尬呢... ( ;´д｀)" },
+            { label: "8 小時", msg: "睡眠界的超級富翁！ ( °ω° )" },
+            { label: "30 分鐘", msg: "這只是大腦稍微斷片而已 (ﾟдﾟ)" },
+            { label: "6 小時", msg: "『陸』續補眠中，機能維持 (´-ω-`)" },
+            { label: "再來一次", msg: "命運叫你重抽，快平反！ ( ᐛ )" },
+            { label: "15 分鐘", msg: "時間短到夢都沒開始寫 ( ¯•ω•¯ )" },
+            { label: "7 小時", msg: "『妻』望中的完美平衡點 (´▽｀)" },
+            { label: "睡一整天", msg: "睡覺界的一『直』標竿 (¦3[▓▓]" },
+            { label: "5 小時", msg: "『五』力全開！撐住啊 (ง'̀-'́)ง" },
+            { label: "1 小時", msg: "『醫』點都不夠，保重身體 (´;ω;`)" },
+            { label: "4 小時", msg: "半夢半醒，看誰都像外星人 (⊙ˍ⊙)" },
+            { label: "再來一次", msg: "手滑了吧？再給你一次機會 (๑•̀ㅂ•́)و" },
+            { label: "8 小時", msg: "神清氣爽，可以去打老虎了 ✨" },
+            { label: "10 分鐘", msg: "這真的太『拾』分不足了 (´Д` )" },
             { label: "6 小時", msg: "普通的六小時，普通的快樂 (・∀・)" },
-            { label: "睡到爽", msg: "枕頭對你發出了熱情的邀請 ヽ(✿ﾟ▽ﾟ)ノ" }
+            { label: "睡到爽", msg: "枕頭發出了熱情邀請 ヽ(✿ﾟ▽ﾟ)ノ" }
         ];
         
-        const colors = ["#e1f4f3", "#f9e1e1", "#fcf1d8", "#e8e8e8"];
+        // 飽和清新的配色
+        const colors = ["#FFADAD", "#FFD6A5", "#FDFFB6", "#CAFFBF", "#9BFBC0", "#A0C4FF", "#BDB2FF", "#FFC6FF"];
         const numSegments = data.length;
         const arc = 2 * Math.PI / numSegments;
         let currentAngle = 0;
@@ -106,22 +109,21 @@
                 const angle = i * arc;
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.beginPath();
-                ctx.moveTo(250, 250);
-                ctx.arc(250, 250, 250, angle, angle + arc);
-                ctx.lineTo(250, 250);
+                ctx.moveTo(300, 300);
+                ctx.arc(300, 300, 300, angle, angle + arc);
+                ctx.lineTo(300, 300);
                 ctx.fill();
-                
                 ctx.strokeStyle = "#fff";
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 2;
                 ctx.stroke();
 
                 ctx.save();
-                ctx.translate(250, 250);
+                ctx.translate(300, 300);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = "#666";
-                ctx.font = "16px sans-serif";
-                ctx.fillText(item.label, 230, 6);
+                ctx.fillStyle = "#444";
+                ctx.font = "bold 22px Arial"; // 加大轉盤文字
+                ctx.fillText(item.label, 270, 10);
                 ctx.restore();
             });
         }
@@ -142,7 +144,7 @@
                 const winningIndex = Math.floor(((360 - actualRotation + 270) % 360) / (360 / numSegments));
                 const finalResult = data[winningIndex];
                 
-                resultText.innerText = finalResult.label + " ✨";
+                resultText.innerText = finalResult.label;
                 commentText.innerText = finalResult.msg;
                 commentText.style.display = "block";
                 
