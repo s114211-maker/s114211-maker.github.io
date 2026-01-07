@@ -2,57 +2,114 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>今晚睡多久？轉盤</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期末肝苦談：睡眠命運轉盤</title>
     <style>
-        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #2c3e50; color: white; margin: 0; }
-        .wheel-container { position: relative; width: 350px; height: 350px; }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #ecf0f1; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            background: conic-gradient(
-                #e74c3c 0deg 45deg, #e67e22 45deg 90deg, #f1c40f 90deg 135deg, #2ecc71 135deg 180deg,
-                #3498db 180deg 225deg, #9b59b6 225deg 270deg, #1abc9c 270deg 315deg, #34495e 315deg 360deg
-            );
-        }
-        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #f1c40f; z-index: 10; }
-        button { margin-top: 30px; padding: 10px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 20px; border: none; background: #e74c3c; color: white; transition: 0.3s; }
-        button:hover { background: #c0392b; transform: scale(1.1); }
-        #result { margin-top: 20px; font-size: 1.5rem; font-weight: bold; }
+        body { font-family: 'Microsoft JhengHei', sans-serif; background: #1a1a2e; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        h1 { margin-bottom: 20px; text-shadow: 0 0 10px #ff00ff; }
+        
+        .wheel-box { position: relative; width: 400px; height: 400px; }
+        
+        /* 指針 */
+        .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid #ff2e63; z-index: 10; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+
+        canvas { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #30e3ca; box-shadow: 0 0 20px rgba(48, 227, 202, 0.5); transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
+
+        .controls { margin-top: 40px; }
+        button { padding: 12px 35px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; border: none; background: #30e3ca; color: #1a1a2e; font-weight: bold; transition: 0.3s; box-shadow: 0 5px 15px rgba(48, 227, 202, 0.4); }
+        button:hover { background: #ff2e63; color: white; transform: scale(1.1); }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        #result { margin-top: 25px; font-size: 1.8rem; height: 2rem; color: #f9ed69; text-shadow: 0 0 5px rgba(249, 237, 105, 0.5); }
     </style>
 </head>
 <body>
 
-    <h1>🌙 今晚睡覺時數抽獎機</h1>
-    <div class="wheel-container">
+    <h1>🚀 期末報告：睡眠命運轉盤</h1>
+    
+    <div class="wheel-box">
         <div class="pointer"></div>
-        <div id="wheel"></div>
+        <canvas id="wheelCanvas" width="400" height="400"></canvas>
     </div>
-    <button onclick="spin()">開始命運轉盤！</button>
-    <div id="result">點擊按鈕，決定你的睡眠時數</div>
+
+    <div class="controls">
+        <button id="spinBtn">命運交給 GitHub Pages！</button>
+    </div>
+
+    <div id="result"></div>
 
     <script>
-        let currentRotation = 0;
-        const sleepHours = ["1小時(慘)", "4小時", "6小時", "8小時(健康)", "10小時", "12小時(豬)", "不准睡(爆肝)", "隨便睡"];
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const btn = document.getElementById('spinBtn');
+        const resultText = document.getElementById('result');
+
+        // 搞笑選項列表 (12格)
+        const options = [
+            "通宵寫 Code", "30 分鐘", "8 小時(夢裡)", "再來一次", 
+            "睡一整天", "1 小時", "通宵看劇", "再來一次",
+            "4 小時", "15 分鐘", "睡到期末考完", "直接退學(誤)"
+        ];
+        
+        const colors = ["#ff9f43", "#ee5253", "#0abde3", "#10ac84", "#5f27cd", "#ff9ff3", "#feca57", "#ff6b6b", "#48dbfb", "#1dd1a1", "#00d2d3", "#54a0ff"];
+        
+        const numSegments = options.length;
+        const arc = 2 * Math.PI / numSegments;
+        let currentAngle = 0;
+
+        // 繪製轉盤
+        function drawWheel() {
+            options.forEach((text, i) => {
+                const angle = i * arc;
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.beginPath();
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 200, angle, angle + arc);
+                ctx.lineTo(200, 200);
+                ctx.fill();
+
+                // 繪製文字
+                ctx.save();
+                ctx.translate(200, 200);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 16px Arial";
+                ctx.fillText(text, 180, 10);
+                ctx.restore();
+            });
+        }
+
+        drawWheel();
 
         function spin() {
-            const btn = document.querySelector('button');
             btn.disabled = true;
+            resultText.innerText = "旋轉中...";
             
-            // 隨機旋轉 5~10 圈 + 隨機角度
-            const extraDegree = Math.floor(Math.random() * 360);
-            const totalDegree = 1800 + extraDegree; 
-            currentRotation += totalDegree;
+            const spinAngle = Math.floor(Math.random() * 360) + 2880; // 旋轉至少 8 圈
+            currentAngle += spinAngle;
             
-            const wheel = document.getElementById('wheel');
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-            // 計算結果 (逆時針計算對應區塊)
-            const actualDegree = (360 - (currentRotation % 360)) % 360;
-            const index = Math.floor(actualDegree / 45);
+            canvas.style.transform = `rotate(${currentAngle}deg)`;
 
             setTimeout(() => {
-                document.getElementById('result').innerText = `結果是：${sleepHours[index]}！`;
-                btn.disabled = false;
-            }, 4000);
+                // 計算停止在哪一格
+                const actualRotation = currentAngle % 360;
+                // 轉盤旋轉是順時針，所以要用 360 減去角度來換算 index
+                // 指針在上方 (270度位置)，所以要加偏移量計算
+                const winningIndex = Math.floor(((360 - actualRotation + 270) % 360) / (360 / numSegments));
+                const result = options[winningIndex];
+                
+                resultText.innerText = `最終命運：${result}`;
+                
+                if(result === "再來一次") {
+                    setTimeout(() => { alert("運氣真好！再來一次！"); btn.disabled = false; }, 500);
+                } else {
+                    btn.disabled = false;
+                }
+            }, 5000);
         }
+
+        btn.addEventListener('click', spin);
     </script>
 </body>
 </html>
