@@ -6,22 +6,20 @@
     <title>睡眠命運轉盤</title>
     <style>
         body { font-family: 'Microsoft JhengHei', sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        h1 { margin-bottom: 30px; letter-spacing: 2px; color: #00adb5; }
+        h1 { margin-bottom: 20px; color: #00adb5; text-shadow: 0 0 15px rgba(0,173,181,0.5); }
         
         .wheel-box { position: relative; width: 420px; height: 420px; }
-        
-        /* 指針 */
         .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid #ff5722; z-index: 10; }
 
-        canvas { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #393e46; box-shadow: 0 0 30px rgba(0, 173, 181, 0.3); transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
+        canvas { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #393e46; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
 
-        .controls { margin-top: 40px; }
-        button { padding: 15px 40px; font-size: 1.3rem; cursor: pointer; border-radius: 8px; border: none; background: #00adb5; color: #eeeeee; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #00fff5; color: #222831; transform: translateY(-3px); }
-        button:active { transform: translateY(0); }
+        .controls { margin-top: 30px; }
+        button { padding: 15px 40px; font-size: 1.3rem; cursor: pointer; border-radius: 50px; border: none; background: #00adb5; color: #fff; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        button:hover { background: #00fff5; color: #222831; transform: scale(1.05); }
         button:disabled { background: #555; cursor: not-allowed; }
 
-        #result { margin-top: 30px; font-size: 2rem; font-weight: bold; color: #00fff5; min-height: 2.5rem; }
+        #result { margin-top: 20px; font-size: 1.8rem; font-weight: bold; color: #f9ed69; height: 2.5rem; }
+        #comment { margin-top: 10px; font-size: 1.2rem; color: #ff5722; font-style: italic; min-height: 1.5rem; }
     </style>
 </head>
 <body>
@@ -38,32 +36,39 @@
     </div>
 
     <div id="result"></div>
+    <div id="comment"></div>
 
     <script>
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
         const btn = document.getElementById('spinBtn');
         const resultText = document.getElementById('result');
+        const commentText = document.getElementById('comment');
 
-        // 選項列表 (16格，增加正常選項的出現機率)
-        const options = [
-            "6 小時", "通宵", "8 小時", "30 分鐘", 
-            "7 小時", "再來一次", "5 小時", "一整天",
-            "6 小時", "1 小時", "8 小時", "再來一次",
-            "7 小時", "15 分鐘", "5 小時", "睡到自然醒"
+        // 選項與對應的搞笑評論
+        const data = [
+            { label: "6 小時", msg: "還行啦，勉強算是有在呼吸。" },
+            { label: "通宵", msg: "恭喜！你的肝正在對你發出求救訊號。" },
+            { label: "8 小時", msg: "神清氣爽！你的人生贏家劇本已開寫。" },
+            { label: "30 分鐘", msg: "這不是睡覺，這叫斷片。" },
+            { label: "7 小時", msg: "標準的打工人睡眠，精神體力 70%。" },
+            { label: "再來一次", msg: "命運都不忍心看你睡這麼少，重抽！" },
+            { label: "5 小時", msg: "身體要壞了，黑眼圈已經掉到下巴了。" },
+            { label: "一整天", msg: "你是睡覺還是冬眠？記得設鬧鐘吃晚餐。" },
+            { label: "1 小時", msg: "這叫「快速關機再啟動」，遲早會燒壞。" },
+            { label: "15 分鐘", msg: "恭喜獲得「熊貓眼」Buff 加成！" },
+            { label: "睡到自然醒", msg: "夢想中的生活！你的鬧鐘已氣到離家出走。" },
+            { label: "再來一次", msg: "運氣也是實力的一種，再給你一次機會。" }
         ];
         
-        // 配色方案
         const colors = ["#222831", "#393e46", "#00adb5", "#eeeeee"];
-        
-        const numSegments = options.length;
+        const numSegments = data.length;
         const arc = 2 * Math.PI / numSegments;
         let currentAngle = 0;
 
         function drawWheel() {
-            options.forEach((text, i) => {
+            data.forEach((item, i) => {
                 const angle = i * arc;
-                // 交替背景顏色
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.beginPath();
                 ctx.moveTo(250, 250);
@@ -71,15 +76,13 @@
                 ctx.lineTo(250, 250);
                 ctx.fill();
 
-                // 繪製文字
                 ctx.save();
                 ctx.translate(250, 250);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
-                // 根據背景調整文字顏色
                 ctx.fillStyle = (colors[i % colors.length] === "#eeeeee") ? "#222831" : "#fff";
                 ctx.font = "bold 18px Arial";
-                ctx.fillText(text, 230, 10);
+                ctx.fillText(item.label, 230, 10);
                 ctx.restore();
             });
         }
@@ -88,9 +91,9 @@
 
         function spin() {
             btn.disabled = true;
-            resultText.innerText = "正在決定命運...";
+            resultText.innerText = "轉動中...";
+            commentText.innerText = "";
             
-            // 旋轉角度：至少轉 10 圈 (3600度) + 隨機角度
             const spinAngle = Math.floor(Math.random() * 360) + 3600; 
             currentAngle += spinAngle;
             
@@ -98,21 +101,18 @@
 
             setTimeout(() => {
                 const actualRotation = currentAngle % 360;
-                // 指針在上方（270度），計算落在哪個索引
                 const winningIndex = Math.floor(((360 - actualRotation + 270) % 360) / (360 / numSegments));
-                const result = options[winningIndex];
+                const finalResult = data[winningIndex];
                 
-                resultText.innerText = `結果：${result}`;
+                resultText.innerText = `結果：${finalResult.label}`;
+                commentText.innerText = finalResult.msg;
                 
-                if(result === "再來一次") {
-                    setTimeout(() => { 
-                        alert("命中註定：再來一次！"); 
-                        btn.disabled = false; 
-                    }, 500);
+                if(finalResult.label === "再來一次") {
+                    setTimeout(() => { btn.disabled = false; }, 1000);
                 } else {
                     btn.disabled = false;
                 }
-            }, 5000); // 旋轉時間 5 秒
+            }, 5000);
         }
 
         btn.addEventListener('click', spin);
